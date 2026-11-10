@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/organic-f68b538a-d9c5-4d6f-9e8c-ef5e8102c92b/styles.css">
+<script src="_ds/organic-f68b538a-d9c5-4d6f-9e8c-ef5e8102c92b/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:clamp(12px,4vw,var(--space-6)) clamp(10px,3vw,var(--space-3));box-sizing:border-box;position:relative;background:url('assets/fundo-quiz.png') center/cover">
+  <div style="width:100%;max-width:820px;box-sizing:border-box;position:relative;display:flex;flex-direction:column;gap:var(--space-4);padding:clamp(20px,5vw,48px) clamp(16px,4.5vw,40px);border-radius:clamp(20px,4vw,calc(var(--radius-lg) * 1.5));background:color-mix(in srgb, var(--color-bg) 90%, transparent);backdrop-filter:blur(10px);box-shadow:var(--shadow-lg)">
+
+    <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+        <h1 style="font-family:'Pixelify Sans',var(--font-heading);font-weight:700;font-size:clamp(32px,7vw,56px);line-height:1.05;margin:0;text-wrap:pretty">qual mob vc seria com base na sua personalidade?</h1>
+        <div style="width:100%;aspect-ratio:16/9;border-radius:calc(var(--radius-lg) * 1.15);overflow:hidden;box-shadow:var(--shadow-md)"><image-slot id="capa-quiz-campo" src="assets/capa-mobs-campo.png" shape="rect" placeholder="Arraste a imagem de capa aqui"></image-slot></div>
+        <div style="display:flex;padding-top:var(--space-2)"><button class="btn btn-primary" style="font-size:17px;padding:14px 28px" onClick="{{ start }}">Começar</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isQuestion }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="btn btn-ghost" style="opacity:{{ backOpacity }};padding-left:8px;padding-right:8px" disabled="{{ backDisabled }}" onClick="{{ back }}">← voltar</button>
+          <div style="flex:1;height:10px;border-radius:999px;background:var(--color-neutral-200);overflow:hidden">
+            <div style="height:100%;width:{{ progress }};background:var(--color-accent);border-radius:999px;transition:width .35s ease"></div>
+          </div>
+          <span style="font-size:14px;font-weight:600;min-width:40px;text-align:right">{{ qNum }}/{{ qTotal }}</span>
+        </div>
+        <sc-if value="{{ showQuip }}" hint-placeholder-val="{{ false }}">
+          <div style="align-self:flex-start;padding:10px 18px;border-radius:999px;background:var(--color-accent-2-200);color:var(--color-accent-2-900);font-family:'Pixelify Sans',var(--font-heading);font-weight:600;font-size:18px">{{ quip }}</div>
+        </sc-if>
+        <sc-for list="{{ qSlots }}" as="s" hint-placeholder-count="1">
+          <sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}">
+            <div style="width:100%;aspect-ratio:16/7;border-radius:calc(var(--radius-lg) * 1.15);overflow:hidden;background:{{ s.bg }}"><image-slot id="pergunta-{{ s.n }}" src="{{ s.img }}" fit="{{ s.fit }}" shape="rect" placeholder="Imagem da pergunta {{ s.n }}"></image-slot></div>
+          </sc-if>
+        </sc-for>
+        <h2 style="font-family:'Pixelify Sans',var(--font-heading);font-weight:700;font-size:clamp(24px,5vw,36px);line-height:1.15;margin:0;text-wrap:pretty">{{ q.text }}</h2>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ opts }}" as="o" hint-placeholder-count="8">
+            <button onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;text-align:left;padding:12px 16px 12px 12px;min-height:52px;border-radius:26px;border:2px solid {{ o.border }};background:{{ o.bg }};color:var(--color-text);font:inherit;font-size:clamp(15px,3.6vw,16px);line-height:1.35;cursor:pointer;transition:background .15s,border-color .15s" style-hover="border-color:var(--color-accent-400)">
+              <span style="flex:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;background:{{ o.dotBg }};color:{{ o.dotFg }}">{{ o.letter }}</span>
+              <span>{{ o.text }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ showNext }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" style="font-size:17px;padding:14px 28px" disabled="{{ nextDisabled }}" onClick="{{ next }}">{{ nextLabel }}</button></div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-3);padding:var(--space-5) 0;text-align:center">
+        <img src="assets/carregando.jpg" alt="pensano" style="width:220px;height:220px;object-fit:cover;border-radius:calc(var(--radius-lg) * 1.15);box-shadow:var(--shadow-md)">
+        <div style="font-family:'Pixelify Sans',var(--font-heading);font-weight:700;font-size:clamp(28px,6vw,40px);line-height:1.1">descobrindo seu mob…</div>
+        <div style="width:100%;max-width:360px;height:12px;border-radius:999px;background:var(--color-neutral-200);overflow:hidden">
+          <div style="height:100%;width:{{ loadPct }};background:var(--color-accent);border-radius:999px;transition:width .12s linear"></div>
+        </div>
+        <div style="font-size:16px;color:var(--color-neutral-700)">{{ loadMsg }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+        <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+          <div style="align-self:flex-start;max-width:100%;box-sizing:border-box;padding:8px 16px;border-radius:999px;background:var(--color-accent-2-200);color:var(--color-accent-2-900);font-family:'Pixelify Sans',var(--font-heading);font-weight:600;font-size:16px;line-height:1.3;text-wrap:pretty">{{ endQuip }}</div>
+          <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+            <sc-for list="{{ mobSlots }}" as="m" hint-placeholder-count="1">
+              <sc-if value="{{ m.show }}" hint-placeholder-val="{{ false }}">
+                <div style="width:160px;height:200px;border-radius:calc(var(--radius-lg) * 1.15);background:{{ m.bg }};overflow:hidden;box-shadow:var(--shadow-md)"><image-slot id="mob-{{ m.key }}" src="{{ m.img }}" fit="contain" shape="rect" placeholder="Imagem do mob"></image-slot></div>
+              </sc-if>
+            </sc-for>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:15px;color:var(--color-accent-700);font-weight:600">você é…</span>
+              <h1 style="font-family:'Pixelify Sans',var(--font-heading);font-weight:700;font-size:clamp(40px,9vw,64px);line-height:1;margin:0">{{ result.name }}</h1>
+              <button class="btn btn-ghost" style="align-self:flex-start;font-size:13px;padding:6px 10px" onClick="{{ toggleMusic }}">{{ musicLabel }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="card elev-md" style="padding:clamp(18px,4vw,var(--space-4));gap:var(--space-2)">
+          <div style="font-family:'Pixelify Sans',var(--font-heading);font-weight:700;font-size:22px">{{ result.tagline }}</div>
+          <p style="margin:0;font-size:17px;line-height:1.55;text-wrap:pretty">{{ result.desc }}</p>
+        </div>
+        <sc-if value="{{ showBreakdown }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-family:'Pixelify Sans',var(--font-heading);font-weight:700;font-size:20px">seu DNA de mob</div>
+            <sc-for list="{{ breakdown }}" as="b" hint-placeholder-count="8">
+              <div style="display:grid;grid-template-columns:36px minmax(0,110px) minmax(0,1fr) 40px;align-items:center;gap:10px;font-size:14px">
+                <div style="width:36px;height:36px;border-radius:50%;background:{{ b.dotBg }} url('{{ b.img }}') center/70% no-repeat"></div>
+                <span style="font-weight:600">{{ b.name }}</span>
+                <div style="height:12px;border-radius:999px;background:var(--color-neutral-200);overflow:hidden"><div style="height:100%;width:{{ b.pct }};background:{{ b.color }};border-radius:999px"></div></div>
+                <span style="text-align:right">{{ b.pct }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" style="flex:1 1 100%;font-size:17px;padding:14px 28px" disabled="{{ shareDisabled }}" onClick="{{ share }}">{{ shareLabel }}</button>
+          <sc-if value="{{ showFallback }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1 1 100%;font-size:14px;color:var(--color-neutral-700)">{{ shareMsg }}</div>
+          </sc-if>
+          <button class="btn btn-secondary" style="flex:1 1 160px" onClick="{{ copyLink }}">{{ copyLabel }}</button>
+          <button class="btn btn-secondary" style="flex:1 1 160px" onClick="{{ saveImg }}">{{ imgLabel }}</button>
+          <button class="btn btn-ghost" style="flex:1 1 120px" onClick="{{ restart }}">refazer</button>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;autoAdvance&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;suspense&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;questionImages&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showBreakdown&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const L = ['A','B','C','D','E','F','G','H'];
+const MOBS = [
+  { name:"Enderman", key:'enderman', img:'assets/mobs/enderman.png', tagline:"o misterioso", desc:"você não odeia pessoas, só prefere que elas fiquem longe. é misterioso, não olha muito nos olhos, não gosta de ser incomodado e se alguém mexer nas suas coisas pode considerar uma ameaça de guerra. inclusive, tomar banho não parece estar nos seus planos." },
+  { name:"Creeper", key:'creeper', img:'assets/mobs/creeper.png', tagline:"o pavio curto", desc:"você parece tranquilo até não ser mais. guarda tudo, acumula estresse e uma hora simplesmente EXPLODE, totalmente imprevisível. depois fica pensando se exagerou, mas também não vai pedir desculpas pq não perde a razão. terapia vai ter assunto novo." },
+  { name:"Golem de Ferro", key:'iron-golem', img:'assets/mobs/iron-golem.png', tagline:"o protetor", desc:"você tem aquela personalidade de quem não demonstra muito, mas se importa pra caramba. protetor, leal e meio difícil de conquistar. não fala muito sobre sentimentos, prefere demonstrar com atitudes. está sempre de olho em quem gosta e não costuma abandonar ninguém. mexeu com alguém importante pra você? aí o negócio fica sério. basicamente um segurança particular com sentimentos." },
+  { name:"Villager", key:'villager', img:'assets/mobs/villager.png', tagline:"o negociador", desc:"você é meio peculiar, tem seus próprios hábitos e provavelmente repete as mesmas coisas todos os dias. gosta de conforto, rotina e de ficar no seu cantinho. quando alguém te pede alguma coisa, sua primeira reação é fazer aquele famoso \"hmmmm\". é meio desconfiado, negocia até o que não precisa e sempre tenta sair ganhando. personalidade questionável, mas pelo menos sabe fazer negócios." },
+  { name:"Bruxa", key:'bruxa', img:'assets/mobs/bruxa.png', tagline:"a espertinha", desc:"você é fofoqueiro? talvez. julgador? com certeza. tem uma opinião sobre absolutamente tudo e provavelmente já criou umas 15 teorias sobre alguém que viu por cinco segundos. não perde uma fofoca. serviu investigação." },
+  { name:"Aranha", key:'aranha', img:'assets/mobs/aranha.png', tagline:"a observadora", desc:"você gosta de ficar na sua, mas quando alguém te incomoda, mostra que não é tão inofensivo assim. tem uma energia meio misteriosa, aparece quando ninguém espera e provavelmente assusta as pessoas sem nem tentar. mas não se engane: se te vê, já parte pro ataque. aparentemente, diplomacia não é seu forte. socialmente duvidoso, mas estiloso." },
+  { name:"Ghast", key:'ghast', img:'assets/mobs/ghast.png', tagline:"o dramático", desc:"você é dramático num nível preocupante. qualquer inconveniência vira o fim do mundo e qualquer situação constrangedora fica sendo lembrada durante os próximos 8 anos. provavelmente já criou diálogos imaginários que nunca vão acontecer. forças, guerreiro, segura a cabeça senão a coroa cai, porque tá difícil." },
+  { name:"Zumbi", key:'zumbi', img:'assets/mobs/zumbi.png', tagline:"o desligado", desc:"você vive no automático, parece que está presente fisicamente, mas mentalmente já foi de arrasta. demora pra processar as coisas, acorda cansado e provavelmente precisa de umas 14 horas de sono. sua energia social está sempre em 2%. mas uma coisa é certa: você não desiste fácil. pode demorar uma eternidade, pode levar mil tombos, mas continua indo atrás do que quer. persistência ou teimosia? fica aí o questionamento." },
+  { name:"Gato", key:'gato', img:'assets/mobs/gato.png', tagline:"o independente", desc:"você simplesmente não nasceu pra socializar. gosta de carinho, mas só quando VOCÊ quer. demora pra responder, some do nada e depois aparece como se nada tivesse acontecido. tem problemas sérios com demonstrações de afeto, mas tudo bem, divou na arte de ser inacessível." },
+  { name:"Raposa", key:'raposa', img:'assets/mobs/raposa.png', tagline:"o astuto", desc:"você é literalmente a pessoa mais desconfiada do ambiente. é esperta, observa tudo, inclusive detalhes despercebidos, duvida de todos e ainda finge que não está nem aí. parece que nasceu pra investigar a vida alheia. serviu FBI." },
+  { name:"Axolote", key:'axolote', img:'assets/mobs/axolote.png', tagline:"o tranquilo", desc:"você é literalmente um neném. gosta de carinho, atenção e provavelmente ficaria feliz se alguém te desse um presentinho aleatório. meio emocionado, meio bobinho e facilmente conquistado por pequenas demonstrações de afeto. serviu fofura." },
+  { name:"Lobo", key:'lobo', img:'assets/mobs/lobo.png', tagline:"o fiel", desc:"você é aquele tipo de pessoa que fala que não liga, mas liga SIM. extremamente apegado a quem gosta, um pouco ciumento e provavelmente capaz de cometer pequenos crimes pelos amigos. lealdade é tudo, mas cuidado com esse apego." },
+  { name:"Allay", key:'allay', img:'assets/mobs/allay.png', tagline:"o prestativo", desc:"você tem dois neurônios e os dois estão de férias. vive distraído, esquece o que estava fazendo no meio da tarefa e provavelmente se perderia dentro da própria casa. não tankei essa personalidade, mas pelo menos é um amorzinho." },
+  { name:"Esqueleto", key:'esqueleto', img:'assets/mobs/esqueleto.png', tagline:"o frio e calculista", desc:"você tem a personalidade de quem responde kkkk sem ter achado graça nenhuma. vive no deboche, não sabe demonstrar sentimentos e tem um humor duvidoso que provavelmente faria você ser cancelado em algum grupo. simplesmente não tem filtro. serviu entretenimento." },
+  { name:"Panda", key:'panda', img:'assets/mobs/panda.jpg', dark:true, tagline:"o preguiçoso", desc:"você só quer comer, dormir e não ser incomodado. tem seus momentos de fofura, mas também consegue ser extremamente preguiçoso. provavelmente cancelaria todos os compromissos só pra ficar deitado. prioridades, né." },
+  { name:"Slime", key:'slime', img:'assets/mobs/slime.png', tagline:"o brincalhão", desc:"você é meio bobinho, divertido e parece que nunca amadureceu completamente. consegue transformar qualquer situação em brincadeira e provavelmente ri de coisas que nem têm graça. mas, mesmo quando tentam te derrubar, você volta. simplesmente impossível de eliminar." },
+  { name:"Lhama", key:'lhama', img:'assets/mobs/lhama.png', tagline:"o debochado", desc:"você tem uma personalidade forte e não faz muita questão de agradar todo mundo. seu olhar já entrega o que está pensando, mesmo quando você não fala absolutamente nada. gosta do seu espaço, tem suas próprias opiniões e não leva desaforo pra casa. às vezes pode parecer meio difícil de lidar, mas quem convive com você sabe que também tem seu lado divertido. seu talento especial? cuspir desaforo sem nem precisar abrir a boca direito." },
+  { name:"Piglin", key:'piglin', img:'assets/mobs/piglin.png', tagline:"o interesseiro", desc:"você é meio interesseiro? talvez. gosta de receber alguma coisa em troca e dificilmente faz algo de graça. tem seus próprios critérios pra confiar nas pessoas e, se alguém aparece sem oferecer nada, já começa a olhar torto. mas dê ouro e você ganha um amigo. amizade comprada? não vamos entrar nesse assunto." },
+];
+// cada alternativa dá 1 ponto a um único mob (ver Distribuição de pontos.md)
+const SCORE = [["allay","creeper","iron-golem","villager","raposa","slime","lhama","esqueleto"],["enderman","creeper","lhama","piglin","bruxa","gato","ghast","zumbi"],["enderman","creeper","lobo","villager","bruxa","aranha","piglin","lhama"],["gato","esqueleto","iron-golem","villager","slime","bruxa","ghast","lobo"],["enderman","slime","lhama","villager","allay","aranha","panda","zumbi"],["enderman","creeper","iron-golem","panda","bruxa","aranha","ghast","zumbi"],["enderman","lhama","lobo","axolote","aranha","raposa","axolote","esqueleto"],["enderman","creeper","iron-golem","piglin","raposa","aranha","ghast","zumbi"],["allay","piglin","panda","esqueleto","slime","bruxa","axolote","lobo"],["gato","esqueleto","axolote","piglin","raposa","slime","ghast","allay"],["gato","creeper","iron-golem","villager","raposa","esqueleto","axolote","lhama"],["panda","slime","lobo","villager","gato","allay","panda","zumbi"],["enderman","creeper","iron-golem","piglin","bruxa","slime","ghast","zumbi"],["gato","lhama","axolote","villager","raposa","allay","panda","zumbi"],["gato","axolote","lobo","piglin","bruxa","aranha","ghast","esqueleto"]];
+const MI = Object.fromEntries(MOBS.map((m, k) => [m.key, k]));
+const Q = [["Você acabou de entrar em um mundo novo no Minecraft. Qual é sua primeira reação?",["Sai andando sem rumo e, quando percebe, já está longe de todo mundo.","Vai atrás de recursos pra causar o caos. Construir uma casa fica pra depois.","Já começa a organizar tudo. Alguém precisa ter responsabilidade nesse lugar.","Procura uma vila. Vai que aparece uma oportunidade de fazer money.","Fica observando tudo em silêncio. A investigação começa antes mesmo de construir.","Vai atrás dos outros só pra perturbar. A paz não dura muito com você por perto.","Procura o ponto mais alto e fica contemplando a própria existência.","Já quer encontrar algum mob pra enfrentar. Mal chegou e já está procurando problema."]],
+  ["Alguém mexeu nas suas coisas sem pedir. O que você faz?",["Some sem dar explicação. Boa sorte tentando te encontrar.","Fica com uma raiva absurda. Quem foi o querido que fez isso?","Não fala muita coisa, mas mexeu de novo pra você ver.","Quer saber quanto a pessoa vai pagar pelo prejuízo.","Finge que não viu, mas já está planejando alguma coisa.","Solta uma indireta e sai andando como se nada tivesse acontecido.","Faz um escândalo. O mundo precisa saber dessa injustiça.","Vai lá e pega de volta. Sem muita cerimônia."]],
+  ["Qual desses lugares combina mais com você?",["Um lugar isolado, escuro e onde ninguém fique te incomodando.","Um ambiente caótico, cheio de perigo e com grandes chances de dar errado.","Uma floresta bonita ou uma montanha gelada. Um pouco de paz, por favor.","Uma vila tranquila, com comida, plantações e oportunidades de negócio.","Um pântano misterioso. Tem seu charme, não julgue.","Uma caverna escura, cheia de lugares pra explorar e escalar.","O Nether. Aparentemente, você gosta de viver no limite.","Qualquer lugar serve, desde que tenha espaço pra andar sem ser incomodado."]],
+  ["No seu grupo de amigos, você costuma ser quem?",["Some por dias e depois volta como se nada tivesse acontecido.","Faz alguma coisa questionável e ainda acha graça.","Protege todo mundo, mesmo quando ninguém pediu.","Resolve os problemas e tenta impedir que o grupo vire um circo.","Perturba quem está muito quietinho. Alguém precisa movimentar as coisas.","Sabe de tudo que acontece. A central de fofocas tem um representante.","Faz um drama por qualquer coisa. E às vezes com razão.","Não desiste dos amigos, mesmo quando eles testam sua paciência."]],
+  ["Como está seu quarto neste exato momento?",["Pouca coisa, pouca luz e o mínimo de interação possível.","Um verdadeiro cenário de guerra. Você sabe onde está tudo. Mais ou menos.","Tudo arrumadinho. Não mexa onde não foi chamado.","Organizado do seu jeito, com cada coisa no seu devido lugar.","Tem coisas guardadas que você não usa há anos, mas vai que precisa.","Fios, cabos e objetos espalhados. Uma instalação artística.","Ar-condicionado no mínimo, coberta até a cabeça e zero vontade de sair.","O básico já basta. Não precisa de muita coisa pra sobreviver."]],
+  ["Você só pode levar um item no inventário. Qual escolhe?",["Pérola do Ender. Se der problema, é só desaparecer.","TNT. Nem preciso explicar minhas intenções.","Escudo e espada de netherita. Segurança em primeiro lugar.","Esmeraldas ou comida infinita. Prioridades, né?","Poção de invisibilidade. Algumas conversas precisam ser ouvidas.","Teia e olhos de aranha. Não pergunte.","Lágrima de Ghast. Combina com seu lado dramático.","Uma espada de ferro. Não é muito, mas é honesta."]],
+  ["Você está andando sozinho à noite e percebe alguém te observando. O que faz?",["Desaparece imediatamente. Não tem nem conversa.","Encara de volta. Quer descobrir qual é o problema?","Fica em alerta e observa se a pessoa representa alguma ameaça.","Vai pra casa, fecha tudo e finge que não aconteceu.","Dá uma risadinha e some na escuridão. Boa sorte.","Procura um lugar alto pra observar a situação sem ser visto.","Já começa a imaginar mil cenários e sofrer por antecipação.","Continua andando normalmente. Se acontecer alguma coisa, você resolve."]],
+  ["Se pudesse escolher um superpoder, qual seria?",["Teletransporte. Aparecer e desaparecer quando bem entender.","Explosões controladas. Só pra deixar a vida mais interessante.","Ser praticamente indestrutível. Ninguém mexe com quem você protege.","Convencer qualquer pessoa de qualquer coisa. O poder da negociação.","Ficar invisível e descobrir tudo que acontece pelas suas costas.","Andar pelas paredes e pelo teto. Porque andar normalmente é muito comum.","Voar e lançar bolas de fogo. Um pouco de drama nunca matou ninguém.","Força absurda e persistência infinita. Uma hora você consegue."]],
+  ["Qual dessas opções mais combina com seu gosto por comida?",["Alguma coisa diferente ou aquela comida aleatória das três da manhã.","Quanto mais apimentado ou exagerado, melhor.","Comida caseira, prato cheio e nada de frescura.","Qualquer coisa prática. Se não der trabalho, melhor ainda.","Doces estranhos que ninguém entende como você gosta.","Algum salgadinho crocante pra comer enquanto observa a vida alheia.","Uma sopa quentinha enquanto reclama do frio.","Arroz, feijão e carne. Não tem erro."]],
+  ["Você recebe uma mensagem inesperada de alguém com quem não fala há tempos. Qual sua reação?",["Visualiza e deixa pra responder quando der vontade.","Já pensa que vem problema. O que foi dessa vez?","Responde normalmente. Vai que a pessoa precisa de alguma coisa.","Depende. Qual é o interesse por trás dessa mensagem?","Investiga o perfil inteiro antes de responder.","Responde com alguma gracinha só pra testar a reação.","Cria 37 teorias sobre o motivo da mensagem.","Responde sem pensar muito. O que tiver que acontecer, acontece."]],
+  ["Quando alguém te irrita, você geralmente:",["Simplesmente some. Não vale o desgaste.","Perde a paciência rapidinho. Não nasceu pra passar vontade.","Tenta manter a calma, mas não abusa.","Pensa se vale a pena discutir ou se é melhor ignorar.","Guarda a informação. Nunca se sabe quando vai ser útil.","Solta uma provocação e ainda acha graça.","Fica remoendo a situação por muito mais tempo do que deveria.","Resolve na hora. Não gosta de deixar pendências."]],
+  ["Seu plano para o fim de semana é:",["Ficar no próprio canto, sem ninguém perturbando.","Fazer alguma coisa diferente. Tédio não dá.","Passar um tempo com quem gosta.","Colocar as coisas em ordem e adiantar algumas tarefas.","Fazer o que der vontade, sem precisar explicar.","Sair por aí e ver no que vai dar.","Ficar em casa, debaixo das cobertas, vivendo tranquilamente.","Aproveitar pra fazer tudo aquilo que ficou pendente."]],
+  ["Se sua vida fosse um filme, qual seria seu papel?",["O personagem misterioso que aparece pouco, mas deixa todo mundo curioso.","O responsável por todas as cenas caóticas.","Aquele que protege o grupo e salva todo mundo no final.","O personagem que sempre tem um plano e, de preferência, sai ganhando.","Quem sabe de todos os segredos, mas não conta nada.","O alívio cômico que aparece nas horas mais inesperadas.","O protagonista de um drama que ninguém pediu.","Aquele que apanha, levanta e continua. Ícone da persistência."]],
+  ["Você ganhou um dia inteiro sem obrigações. Como aproveita?",["Desaparece do mapa e aproveita a própria companhia.","Faz alguma coisa que provavelmente não deveria.","Aproveita pra ficar com as pessoas importantes.","Coloca a vida em ordem. Descansar depois, talvez.","Faz alguma coisa diferente só pela curiosidade.","Vai atrás de diversão, mesmo que não tenha nenhum plano.","Dorme, come e repete. Finalmente um dia de paz.","Aproveita pra tirar do papel alguma coisa que estava adiando."]],
+  ["Qual dessas situações tem mais chance de acontecer com você?",["Ficar horas sem responder e depois voltar com um simples \"oi\".","Fazer alguma besteira e ainda precisar de um tempo pra entender o tamanho do estrago.","Defender alguém mesmo sabendo que vai sobrar pra você.","Transformar qualquer situação em uma oportunidade de ganhar alguma coisa.","Perceber detalhes que ninguém mais notou e guardar essa informação.","Aparecer do nada, assustar alguém e achar graça da reação.","Ficar pensando em uma conversa de três dias atrás como se tivesse acontecido agora.","Insistir em alguma coisa até conseguir, mesmo que todo mundo já tenha desistido."]]];
+const NQ = Q.length;
+const QIMG = { 1:['assets/perguntas/p01.jpg','cover'], 2:['assets/perguntas/p02.jpg','contain'], 3:['assets/perguntas/p03.jpg','cover'], 8:['assets/perguntas/p08b.jpg','cover'], 10:['assets/perguntas/p10b.jpg','cover'], 15:['assets/perguntas/p10.jpg','cover'], 9:['assets/perguntas/p09.jpg','contain'], 11:['assets/perguntas/p11.jpg','cover'], 4:['assets/perguntas/p04.jpg?v=2','cover'], 5:['assets/perguntas/p05.jpg','cover'], 6:['assets/perguntas/p06.jpg','contain'], 7:['assets/perguntas/p15.jpg','cover'], 12:['assets/perguntas/p12.jpg','cover'], 13:['assets/perguntas/p13.jpg','cover'], 14:['assets/perguntas/p14.jpg','cover'] };
+const MSGS = ['lendo seus tweets apagados…','perguntando pro villager…','minerando sua personalidade…','quase lá, não fecha a aba…'];
+const QUIPS = ['irmão...?','não tankei vc','a situação tá ficando crítica','isso explica MUITA coisa','Deus tenha misericórdia','é cada maluco que aparece','apenas respire e continue','o hospício perdeu um membro','pior que combina','o próprio Herobrine está decepcionado','amg, reveja seus conceitos','Nossa SIM, juro'];
+const ENDS = ['não adianta fugir, a verdade sempre aparece','os resultados foram analisados e a situação é preocupante','infelizmente, não temos como mudar seu destino','a terapia vai ter assunto novo','encerramos por aqui antes que piore.','encerramos por aqui, já vimos o suficiente.','melhor parar antes que apareça mais coisa.','chega de perguntas, já temos nossas suspeitas.','vamos deixar isso entre você e o resultado.','antes que isso vire um caso sério, até a próxima.'];
+const rand = (arr, not) => { let x; do { x = arr[Math.floor(Math.random() * arr.length)]; } while (arr.length > 1 && x === not); return x; };
+const KEY = 'quiz-mob-minecraft-v3';
+const LOAD_MS = 2800, TICK = 110;
+
+function loadImg(src) { return new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; }); }
+function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function wrap(ctx, text, x, y, maxW, lh) {
+  const words = text.split(' '); let line = '';
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { ctx.fillText(line, x, y); line = w; y += lh; } else line = t; }
+  if (line) ctx.fillText(line, x, y);
+}
+
+class Component extends DCLogic {
+  state = { screen:'intro', i:0, answers:Array(NQ).fill(null), shared:false, tick:0, storyBusy:false, shareReady:false };
+  componentDidMount() {
+    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.answers) this.setState({ ...s, screen: s.screen === 'loading' ? 'result' : s.screen }); } catch(e) {}
+  }
+  componentDidUpdate() {
+    if (this.state.screen === 'result') {
+      this.prepStory(MOBS[this.compute().best]);
+      if (this.musicPending && this.audio) {
+        this.musicPending = false;
+        this.audio.muted = false;
+        this.audio.volume = 0.55;
+        this.setState({ musicOn:true, audioNeedsTap:false });
+      }
+    }
+    try { localStorage.setItem(KEY, JSON.stringify({screen:this.state.screen,i:this.state.i,answers:this.state.answers,winner:this.state.winner})); } catch(e) {} }
+  componentWillUnmount() { clearTimeout(this.t); clearInterval(this.iv); clearTimeout(this.lt); if (this.audio) this.audio.pause(); }
+  startMusicPreview(startAt) {
+    try {
+      if (!this.audio) { this.audio = new Audio('assets/saxfone.m4a'); this.audio.preload = 'auto'; this.audio.loop = false; }
+      this.audio.pause(); this.audio.muted = startAt < 34; this.audio.volume = startAt < 34 ? 0 : 0.55;
+      this.audio.currentTime = startAt;
+      const p = this.audio.play();
+      if (p && p.then) p.then(() => {
+        if (startAt < 34) { if (this.state.screen === 'result') { this.audio.muted = false; this.audio.volume = 0.55; this.setState({ musicOn:true, audioNeedsTap:false }); } else this.musicPending = true; }
+        else this.setState({ musicOn:true, audioNeedsTap:false });
+      }).catch(() => this.setState({ musicOn:false, audioNeedsTap:true }));
+      else if (startAt < 34) this.musicPending = true;
+      else this.setState({ musicOn:true, audioNeedsTap:false });
+    } catch(e) { this.setState({ musicOn:false, audioNeedsTap:true }); }
+  }
+  toggleMusic() {
+    if (!this.audio || this.audio.paused || this.audio.ended) return this.startMusicPreview(34);
+    this.audio.pause(); this.setState({ musicOn:false });
+  }
+  pick(k) {
+    const answers = this.state.answers.slice(); answers[this.state.i] = k;
+    this.setState({ answers });
+    if (this.props.autoAdvance ?? false) { clearTimeout(this.t); this.t = setTimeout(() => this.next(), 380); }
+  }
+  next() {
+    const { i, answers } = this.state;
+    if (answers[i] == null) return;
+    window.scrollTo(0, 0);
+    if (i < NQ - 1) {
+      this.setState({ i: i + 1, quip: rand(QUIPS, this.state.quip) });
+      return;
+    }
+    this.setState({ quip: null, endQuip: rand(ENDS), winner: this.pickWinner() });
+    if (!(this.props.suspense ?? true)) { this.startMusicPreview(34); return this.setState({ screen:'result' }); }
+    this.startMusicPreview(31.2);
+    this.setState({ screen:'loading', tick:0 });
+    clearInterval(this.iv);
+    this.iv = setInterval(() => this.setState(s => ({ tick: s.tick + 1 })), TICK);
+    this.lt = setTimeout(() => { clearInterval(this.iv); this.setState({ screen:'result' }); }, LOAD_MS);
+  }
+  scores() {
+    const c = Array(MOBS.length).fill(0);
+    this.state.answers.forEach((a, q) => { if (a != null && SCORE[q]) c[MI[SCORE[q][a]]]++; });
+    return c;
+  }
+  pickWinner() {
+    const c = this.scores(), max = Math.max(...c);
+    const tied = c.map((v, k) => v === max ? k : -1).filter(k => k >= 0);
+    return MOBS[tied[Math.floor(Math.random() * tied.length)]].key;
+  }
+  compute() {
+    const c = this.scores();
+    let best = MI[this.state.winner];
+    if (best == null) { const max = Math.max(...c); best = c.indexOf(max); }
+    return { c, best };
+  }
+  async buildStory(result) {
+    {
+      const css = getComputedStyle(document.documentElement);
+      const v = (n, f) => (css.getPropertyValue(n).trim() || f);
+      const bgC = v('--color-bg', '#f6f1e7'), ink = v('--color-text', '#2a2a22'), acc = v('--color-accent-700', '#4a6b2f'), soft = v('--color-accent-2-100', '#efe4d2');
+      const body = getComputedStyle(document.body).fontFamily;
+      await Promise.all([document.fonts.load("700 120px 'Pixelify Sans'"), document.fonts.load("400 40px " + body)]).catch(() => {});
+      const [bg, mob] = await Promise.all([loadImg('assets/fundo-quiz.png'), loadImg(result.img)]);
+      const W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const ctx = cv.getContext('2d');
+      if (bg) { const s = Math.max(W / bg.width, H / bg.height); ctx.drawImage(bg, (W - bg.width*s)/2, (H - bg.height*s)/2, bg.width*s, bg.height*s); } else { ctx.fillStyle = soft; ctx.fillRect(0,0,W,H); }
+      ctx.fillStyle = bgC; ctx.globalAlpha = .94; rr(ctx, 70, 150, W-140, H-300, 60); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.textAlign = 'center'; ctx.fillStyle = ink;
+      ctx.font = "700 46px 'Pixelify Sans'"; ctx.fillText('qual mob do minecraft você é?', W/2, 270);
+      ctx.fillStyle = result.dark ? '#000' : soft; rr(ctx, 190, 330, W-380, 700, 48); ctx.fill();
+      if (mob) { const bw = W-460, bh = 640, s = Math.min(bw / mob.width, bh / mob.height); ctx.drawImage(mob, (W - mob.width*s)/2, 360 + (bh - mob.height*s)/2, mob.width*s, mob.height*s); }
+      const MAXW = W - 260, FOOT = 1690;
+      const lines = (txt, maxW) => { const out = []; let line = ''; for (const w of txt.split(' ')) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; } if (line) out.push(line); return out; };
+      let y = 1110;
+      ctx.fillStyle = acc; ctx.font = "600 44px " + body; ctx.fillText('eu sou…', W/2, y);
+      let ns = 150; ctx.font = `700 ${ns}px 'Pixelify Sans'`;
+      while (ctx.measureText(result.name).width > MAXW && ns > 70) { ns -= 6; ctx.font = `700 ${ns}px 'Pixelify Sans'`; }
+      y += 20 + ns * 0.85; ctx.fillStyle = ink; ctx.fillText(result.name, W/2, y);
+      ctx.font = "700 54px 'Pixelify Sans'";
+      for (const l of lines(result.tagline, MAXW)) { y += 70; ctx.fillText(l, W/2, y); }
+      y += 30;
+      let fs = 40, dl;
+      for (;;) { ctx.font = `400 ${fs}px ` + body; dl = lines(result.desc, MAXW - 40); if (y + dl.length * fs * 1.4 <= FOOT - 50 || fs <= 24) break; fs -= 2; }
+      ctx.fillStyle = ink;
+      for (const l of dl) { y += fs * 1.4; ctx.fillText(l, W/2, y); }
+      ctx.fillStyle = acc; ctx.font = "700 40px 'Pixelify Sans'"; ctx.fillText('faz o quiz e descobre o seu →', W/2, Math.max(FOOT + 30, y + 80));
+      return await new Promise(r => cv.toBlob(r, 'image/png'));
+    }
+  }
+  shareData(result) {
+    const url = location.href.split('#')[0];
+    return { url, title: 'qual mob vc seria?', text: `deu ${result.name.toUpperCase()} no quiz "qual mob vc seria?" — ${result.tagline}. faz aí e descobre o seu 👇` };
+  }
+  // pré-gera o card assim que o resultado aparece, pra que o clique chame navigator.share() sem nenhum await antes
+  prepStory(result) {
+    if (this.storyKey === result.key && this.storyP) return this.storyP;
+    this.storyKey = result.key; this.storyFile = null;
+    this.setState({ shareReady:false });
+    this.storyP = this.buildStory(result).then(blob => {
+      if (this.storyKey === result.key) {
+        if (blob) this.storyFile = new File([blob], `meu-mob-${result.key}.png`, { type:'image/png' });
+        this.setState({ shareReady:true });
+      }
+      return blob;
+    }).catch(e => {
+      console.warn('[share] falha ao gerar imagem:', e);
+      if (this.storyKey === result.key) this.setState({ shareReady:true });
+      return null;
+    });
+    return this.storyP;
+  }
+  shareSupport() {
+    if (!window.isSecureContext) return 'o compartilhar só funciona em site https.';
+    if (typeof navigator.share !== 'function') return 'esse navegador não tem o compartilhar nativo.';
+    return null;
+  }
+  doShare(result) {
+    const d = this.shareData(result);
+    const why = this.shareSupport();
+    if (why) { console.warn('[share]', why); this.setState({ noShare:true, shareMsg: why + ' copia o link ou salva a imagem:' }); return; }
+    const f = this.storyFile;
+    let data = d;
+    if (f && navigator.canShare && navigator.canShare({ files:[f] })) data = { ...d, files:[f] };
+    else if (navigator.canShare && !navigator.canShare(d)) data = { text: d.text + ' ' + d.url };
+    let pr;
+    try { pr = navigator.share(data); } // chamada síncrona dentro do clique
+    catch (e) { return this.onShareErr(e, d); }
+    pr.then(() => this.setState({ noShare:false, shareMsg:'' })).catch(e => {
+      if (e && e.name === 'AbortError') return; // usuário fechou o menu
+      if (data.files) { // alguns apps recusam arquivo: tenta só texto+link
+        navigator.share(d).catch(e2 => this.onShareErr(e2, d));
+        return;
+      }
+      this.onShareErr(e, d);
+    });
+  }
+  onShareErr(e, d) {
+    console.error('[share] navigator.share falhou:', e && e.name, e && e.message);
+    const msg = e && e.name === 'NotAllowedError' ? 'o navegador bloqueou o compartilhar aqui.' : 'não rolou abrir o compartilhar.';
+    this.setState({ noShare:true, shareMsg: msg + ' copia o link ou salva a imagem:' });
+  }
+  async saveImg(result) {
+    if (this.state.busy) return;
+    this.setState({ busy:'img' });
+    try {
+      const blob = (await this.prepStory(result)) || (await this.buildStory(result));
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `meu-mob-${result.key}.png`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } finally { this.setState({ busy:null }); }
+  }
+  copyLink(result) {
+    const d = this.shareData(result), txt = d.text + ' ' + d.url;
+    const ok = () => { this.setState({ copied:true }); setTimeout(() => this.setState({ copied:false }), 1800); };
+    const legacy = () => {
+      const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, txt.length);
+      let done = false; try { done = document.execCommand('copy'); } catch(e) {}
+      ta.remove();
+      if (done) ok(); else { console.error('[share] não deu pra copiar'); window.prompt('copia o link:', txt); }
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(ok, e => { console.warn('[share] clipboard falhou:', e); legacy(); });
+    else legacy();
+  }
+  renderVals() {
+    const { screen, i, answers, tick } = this.state;
+    const auto = this.props.autoAdvance ?? false;
+    const sel = answers[i];
+    const { c, best } = this.compute();
+    const total = c.reduce((a, b) => a + b, 0) || 1;
+    const result = MOBS[best];
+    const breakdown = MOBS.map((m, k) => ({ ...m, n:c[k], pct: Math.round(c[k]/total*100) + '%', color: k === best ? 'var(--color-accent)' : 'var(--color-accent-2)', dotBg: m.dark ? '#000' : 'var(--color-accent-2-100)' })).filter(b => b.n > 0).sort((a, b) => (b.key === result.key) - (a.key === result.key) || b.n - a.n).slice(0, 6);
+    const withImg = MOBS.filter(m => m.img), lm = withImg[(tick * 3) % withImg.length];
+    return {
+      isIntro: screen === 'intro', isQuestion: screen === 'question', isLoading: screen === 'loading', isResult: screen === 'result',
+      start: () => this.setState({ screen:'question', i:0, answers:Array(NQ).fill(null), shared:false, winner:null }),
+      q: { text: Q[i][0] }, qNum: i + 1, qTotal: NQ,
+      qSlots: (this.props.questionImages ?? true) ? Q.map((_, k) => { const im = QIMG[k + 1]; return { n: k + 1, show: k === i, img: im ? im[0] : '', fit: im ? im[1] : 'cover', bg: im && im[1] === 'contain' ? '#ffffff' : 'var(--color-neutral-100)' }; }) : [],
+      progress: ((i + (sel != null ? 1 : 0)) / NQ * 100) + '%',
+      backDisabled: i === 0, backOpacity: i === 0 ? 0.35 : 1,
+      back: () => { clearTimeout(this.t); if (i > 0) this.setState({ i: i - 1 }); },
+      opts: Q[i][1].map((text, k) => {
+        const on = sel === k;
+        return { letter:L[k], text, pick: () => this.pick(k),
+          bg: on ? 'var(--color-accent-100)' : 'var(--color-surface)',
+          border: on ? 'var(--color-accent)' : 'transparent',
+          dotBg: on ? 'var(--color-accent)' : 'var(--color-neutral-100)',
+          dotFg: on ? 'var(--color-bg)' : 'var(--color-neutral-800)' };
+      }),
+      showNext: !auto || i === NQ - 1, nextDisabled: sel == null,
+      nextLabel: i === NQ - 1 ? 'ver meu mob →' : 'próxima →',
+      next: () => this.next(),
+      showQuip: !!this.state.quip, quip: this.state.quip || '',
+      endQuip: this.state.endQuip || ENDS[best % ENDS.length],
+      loadImg: lm.img, loadName: lm.name,
+      loadPct: Math.min(100, Math.round(tick * TICK / LOAD_MS * 100)) + '%',
+      loadMsg: MSGS[Math.min(MSGS.length - 1, Math.floor(tick * TICK / LOAD_MS * MSGS.length))],
+      musicLabel: this.state.musicOn ? '♫ pausar música' : (this.state.audioNeedsTap ? '♫ tocar música' : '♫ música'),
+      toggleMusic: () => this.toggleMusic(),
+      result, breakdown, mobSlots: MOBS.map((m, k) => ({ key:m.key, img:m.img, show: k === best, bg: m.dark ? '#000' : 'var(--color-accent-2-100)' })), showBreakdown: this.props.showBreakdown ?? true,
+      shareLabel: this.state.shareReady ? 'compartilhar resultado' : 'preparando imagem…', shareDisabled: !this.state.shareReady, shareMsg: this.state.shareMsg || 'copia o link ou salva a imagem:',
+      share: () => this.doShare(result),
+      showFallback: !!this.state.noShare,
+      imgLabel: this.state.busy === 'img' ? 'gerando imagem…' : 'salvar imagem',
+      saveImg: () => this.saveImg(result),
+      copyLabel: this.state.copied ? 'link copiado!' : 'copiar link',
+      copyLink: () => this.copyLink(result),
+      restart: () => this.setState({ screen:'intro', i:0, answers:Array(NQ).fill(null), shared:false, winner:null }),
+    };
+  }
+}
+</script>
+</body>
+</html>
